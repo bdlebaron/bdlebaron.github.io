@@ -17,21 +17,21 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
+# baseurl: "" # the subpath of your site, e.g. /blog
 
-title: Blake LeBaron test site 
+title: Blake LeBaron's new github site 
 email: blebaron@brandeis.edu 
 description: >- # this means to ignore newlines until "baseurl:"
-  This is a very short description.
-  This is just my test website.
-  # baseurl: "" # the subpath of your site, e.g. /blog
+  This is a placeholder for a new website I'm building on github.
+  Please stay tuned.  I plan to have this live by early summer 2024.
+
 url: https://bdlebaron.github.io # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: tempx 
 github_username: bdlebaron 
 
 # Build settings
 theme: minima
-plugins:
-  - jekyll-feed
+  # plugins:
+  #   - jekyll-feed
 
 # Exclude from processing.
 # The following items will not be processed, by default.
@@ -50,5 +50,5 @@ plugins:
 #   - node_modules/
 #   - vendor/bundle/
 #   - vendor/cache/
-#   - vendor/gems/
+#   - vendor/gems/:q!
 #   - vendor/ruby/
