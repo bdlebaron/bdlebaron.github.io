@@ -15,3 +15,4 @@ Click **About** to get some quick information on me, and links to my original we
 This website is powered by **jeckyll** (github pages) using the *minimal* theme.  (I'm only a beginner with this, so sorry 
 for things being so crude.)
 
+Just a little more.
