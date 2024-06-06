@@ -10,9 +10,9 @@ permalink: /research/
 
 # This is a summary of research papers which are available now.
 
-1. Dynamic Order Dispersion and Volatility Persistence in a Simple
-Limit Order Book Model
-  - This preliminary paper extends the dynamics of a basic stylized limit
+1. **Dynamic Order Dispersion and Volatility Persistence in a Simple
+Limit Order Book Model**
+  - **ABSTRACT:** This preliminary paper extends the dynamics of a basic stylized limit
   order book model introduced in \mycite{ChiIor2002}. The
   original model is capable of generating some key market microstructure
   features, but it cannot recreate longer range persistence in volatility.
