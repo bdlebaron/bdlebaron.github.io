@@ -13,7 +13,7 @@ permalink: /research/
 1. **Dynamic Order Dispersion and Volatility Persistence in a Simple
 Limit Order Book Model**
   - **Joint with:** Andrew Hawley, Mark Paddrik, and Nathan Palmer
-  - **ABSTRACT:** This preliminary paper extends the dynamics of a basic stylized limit
+  - **Abstract:** This preliminary paper extends the dynamics of a basic stylized limit
   order book model introduced in \mycite{ChiIor2002}. The
   original model is capable of generating some key market microstructure
   features, but it cannot recreate longer range persistence in volatility.
