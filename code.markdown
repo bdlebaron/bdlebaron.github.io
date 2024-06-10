@@ -4,11 +4,7 @@ title: Code
 permalink: /code/
 ---
 
-
-
-
-
 # Links to computer code will go here. 
 
-1. Code 1 
-2. Code 2
+[Software page](https://people.brandeis.edu/~blebaron/soft.html)
+
