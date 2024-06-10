@@ -55,5 +55,5 @@ inflation rate.
 5. **Forecasting Realized Volatility with Kernel Ridge Regression**
   - [Download pdf](https://bdlebaron.github.io/pdfs/epidemics.pdf)
 6. **Optimality of Short Term Rules of Thumb at Long Horizons for an Agent-based Financial Market**
-  - [Download pdf](https://bdlebaron.github.io/pdfs/LongRunABFeb2017.pdf)
+  - [Download pdf](https://bdlebaron.github.io/pdfs/kernelRidgeVol3.pdf)
 
