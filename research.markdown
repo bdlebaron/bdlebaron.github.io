@@ -9,7 +9,13 @@ permalink: /research/
 
 [Publication list](https://people.brandeis.edu/~blebaron/pubs.html)
 
-# This is a summary of research workking papers which are available now.
+# Working papers
+
+# A longer list of old working papers
+
+[List of older working papers](https://people.brandeis.edu/~blebaron/wps.html)
+
+# This is a summary of recent research working papers which are available now.
 
 1. **Dynamic Order Dispersion and Volatility Persistence in a Simple
 Limit Order Book Model**
@@ -58,7 +64,3 @@ inflation rate.
 6. **Optimality of Short Term Rules of Thumb at Long Horizons for an Agent-based Financial Market**
   - [Download pdf](https://bdlebaron.github.io/pdfs/kernelRidgeVol3.pdf)
 
-# A longer list of working papers
-
-
-[List of older working papers](https://people.brandeis.edu/~blebaron/wps.html)
