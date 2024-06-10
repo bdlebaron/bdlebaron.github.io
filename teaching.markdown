@@ -10,8 +10,8 @@ permalink: /teaching/
 
 # This is a summary of classes I'm currently teaching in *Fall 2024*
 
-1. **Machine Learning** 
-2. **Python For Business and Finance**
+1. **Machine Learning and Data Analysis for Business and Finance** 
+2. **Python and Applications to Business Analytics**
 
 # Past courses include
 
