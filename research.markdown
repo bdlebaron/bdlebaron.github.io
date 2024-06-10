@@ -11,11 +11,9 @@ permalink: /research/
 
 # Working papers
 
-# A longer list of old working papers
-
 [List of older working papers](https://people.brandeis.edu/~blebaron/wps.html)
 
-# This is a summary of recent research working papers which are available now.
+# Summary of recent working papers
 
 1. **Dynamic Order Dispersion and Volatility Persistence in a Simple
 Limit Order Book Model**
