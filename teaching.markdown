@@ -24,3 +24,7 @@ permalink: /teaching/
 7. Macroeconomics (PhD)
 8. Econometrics (PhD)
 
+# Web based prototype classes
+
+1. [Agent-based finance](https://people.brandeis.edu/~blebaron/classes/agentfin)
+
