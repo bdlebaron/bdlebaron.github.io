@@ -7,7 +7,7 @@ permalink: /research/
 
 # Publications
 
-[Publication list](https://people.brandeis.edu/pubs.html)
+[Publication list](https://people.brandeis.edu/~blebaron/pubs.html)
 
 # This is a summary of research workking papers which are available now.
 
@@ -61,4 +61,4 @@ inflation rate.
 # A longer list of working papers
 
 
-[List of older working papers](https://people.brandeis.edu/wps.html)
+[List of older working papers](https://people.brandeis.edu/~blebaron/wps.html)
