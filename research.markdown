@@ -5,10 +5,11 @@ permalink: /research/
 ---
 
 
+# Publications
 
+[Publication list](https://people.brandeis.edu/pubs.html)
 
-
-# This is a summary of research papers which are available now.
+# This is a summary of research workking papers which are available now.
 
 1. **Dynamic Order Dispersion and Volatility Persistence in a Simple
 Limit Order Book Model**
@@ -57,3 +58,7 @@ inflation rate.
 6. **Optimality of Short Term Rules of Thumb at Long Horizons for an Agent-based Financial Market**
   - [Download pdf](https://bdlebaron.github.io/pdfs/kernelRidgeVol3.pdf)
 
+# A longer list of working papers
+
+
+[List of older working papers](https://people.brandeis.edu/wps.html)
