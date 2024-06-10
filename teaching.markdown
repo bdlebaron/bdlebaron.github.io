@@ -17,4 +17,10 @@ permalink: /teaching/
 
 1. Forecasting
 2. Computational risk modeling
-3. Asset pricing (PhD)
+3. Financial manias and crises
+4. Introduction to finance (Undergraduate)
+5. Asset pricing (PhD)
+6. Microeconomics (PhD)
+7. Macroeconomics (PhD)
+8. Econometrics (PhD)
+

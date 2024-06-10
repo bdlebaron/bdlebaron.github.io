@@ -28,4 +28,25 @@ Limit Order Book Model**
   literature that may be used as a test bed or sandbox for developing
   agents with more complex behavior.
   - [Download pdf](https://bdlebaron.github.io/pdfs/limit_order_book.pdf)
-2. Paper two
+2. **Learning Integrated Inflation Forecasts in a Simple Multi-agent Macroeconomic Model**
+  - **Joint with:** Karen Smith
+  - **Abstract:** This paper implements a model with a population of heterogeneous macro forecasters.  Their
+objectives are to forecast output and inflation, both inputs in standard New Keynesian
+macro models.  The model is implemented by first calibrating the agents to professional
+forecasters at the micro level.  Model runs then try to replicate both the dynamics, bias
+and cross sectional heterogeneity of forecasts and the economy.  These are done both
+in a model with static forecasters, and one where the forecasters are learning from
+each other in a social fashion.
+We find that expectations about the inflation process which conjecture near random walk
+behavior can be self-fulfilling, yielding inflation volatility and persistence
+on the order of magnitude of U.S. macro data.
+However, our forecasting
+populations often fall short of the heterogeneity of predictions
+from survey data.  In some cases, monetary policy can be used to shift the model
+from its volatile/persistent equilibrium over to a more stable, strongly mean reverting
+inflation rate.
+  - [Download pdf](https://bdlebaron.github.io/pdfs/LearningIntegratedLeBaronSmith.pdf)
+3. **A Century of Market Reversals: Resurrecting Volatility**
+  - **Joint with:** Vincent Bogousslavsky and Jeffrey Pontiff
+  - **Abstract:** Inventory models posit that return autocorrelation is affected by collateral, volume, and expected volatility. We show that daily market autocorrelations are lower on negative return days, consistent with collateral concerns. Unlike previous literature, we document a strong role of volatility on autocorrelation. Puzzlingly, anticipated volume, not volume shocks, drive reversals. Sparked by these findings, we construct a liquidity risk factor in accordance with Pastor-Stambaugh (2003) that is volatility, not volume, based. The volatility-based factor is more robust and has a higher risk premium than the volume-based factor.
+  - [Download pdf](https://bdlebaron.github.io/pdfs/ACenturyofMarketReversalsMarch2024.pdf)
