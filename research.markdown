@@ -50,3 +50,10 @@ inflation rate.
   - **Joint with:** Vincent Bogousslavsky and Jeffrey Pontiff
   - **Abstract:** Inventory models posit that return autocorrelation is affected by collateral, volume, and expected volatility. We show that daily market autocorrelations are lower on negative return days, consistent with collateral concerns. Unlike previous literature, we document a strong role of volatility on autocorrelation. Puzzlingly, anticipated volume, not volume shocks, drive reversals. Sparked by these findings, we construct a liquidity risk factor in accordance with Pastor-Stambaugh (2003) that is volatility, not volume, based. The volatility-based factor is more robust and has a higher risk premium than the volume-based factor.
   - [Download pdf](https://bdlebaron.github.io/pdfs/ACenturyofMarketReversalsMarch2024.pdf)
+4. **Epidemics with space, movement, and asymptomatic spreading**
+  - [Download pdf](https://bdlebaron.github.io/pdfs/epidemics.pdf)
+5. **Forecasting realized volatility with kernel ridge regression**
+  - [Download pdf](https://bdlebaron.github.io/pdfs/epidemics.pdf)
+6. **Optimality of short term rules of thumb at long horizons for an agent-based financial market**
+  - [Download pdf](https://bdlebaron.github.io/pdfs/epidemics.pdf)
+
