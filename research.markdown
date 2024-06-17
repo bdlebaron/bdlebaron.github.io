@@ -7,11 +7,11 @@ permalink: /research/
 
 # Publications
 
-[Publication list](https://./pubs.html)
+[Publication list](https://bdlebaron.github.io/pubs.html)
 
 # Working papers
 
-[List of older working papers](https://./wps.html)
+[List of older working papers](https://bdlebaron.github.io/wps.html)
 
 # Summary of recent working papers
 
