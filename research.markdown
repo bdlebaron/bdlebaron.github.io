@@ -7,11 +7,11 @@ permalink: /research/
 
 # Publications
 
-[Publication list](https://people.brandeis.edu/~blebaron/pubs.html)
+[Publication list](https://pubs.html)
 
 # Working papers
 
-[List of older working papers](https://people.brandeis.edu/~blebaron/wps.html)
+[List of older working papers](https://wps.html)
 
 # Summary of recent working papers
 

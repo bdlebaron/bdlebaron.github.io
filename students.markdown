@@ -4,7 +4,7 @@ title: Students
 permalink: /students/
 ---
 
-# Ph.D. 
+# Ph.D. (*C* = committee chair) 
 
 1. Krisztian Gado
 2. Yuanhui (Roger) Li
