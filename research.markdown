@@ -13,6 +13,10 @@ permalink: /research/
 
 [List of older working papers](https://bdlebaron.github.io/wps.html)
 
+# Conferences organized
+
+[Heterogeneous Agents and Agent-based Modeling (Washington, DC, 2017)](https://people.brandeis.edu/~blebaron/hp/conferenceOrganized.html)
+
 # Summary of recent working papers
 
 1. **Dynamic Order Dispersion and Volatility Persistence in a Simple
