@@ -10,6 +10,13 @@ permalink: /about/
 
 [Blake LeBaron](https://people.brandeis.edu/~blebaron)
 
+<h4> Office phone number: </h4>
+
+**781-736-2258**
+
+
+
+
 # Short biography for Blake LeBaron
 
 I'm curently a professor at **Brandeis University** in the **International Business School**.
