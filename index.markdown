@@ -6,7 +6,7 @@ layout: home
 ---
 
 <h1> Blake LeBaron </h1>
-<h2> Brandeis International Business School </h2>
+<h2> School of Business and Economics </h2>
 
 You have reached Blake LeBaron's site.
 
