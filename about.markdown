@@ -19,7 +19,7 @@ permalink: /about/
 
 # Short biography for Blake LeBaron
 
-I'm curently a professor at **Brandeis University** in the **International Business School**.
+I'm curently a professor at **Brandeis University** in the **School of Business and Economics**.
 
 My research and teaching are centered on computational modeling both empirical and theoretical.
 
