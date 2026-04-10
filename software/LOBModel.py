@@ -64,7 +64,7 @@ class forecasts:
     periods of changing market conditions.
     """
     # initialize forecast components
-    def __init__(self,Lmax,pf,sigmae,volLag):
+    def __init__(self,Lmax,pf,sigmae,volLag,multipleFundamentals):
         """
         Initialize the forecast components and parameters.
         
@@ -82,8 +82,12 @@ class forecasts:
         # Set up fundamental forecasts with multiple versions (low/mid/high)
         fundamentalSpread = 0.10
         deltaSpread = fundamentalSpread/3.
-        self.fundamentalAdjust = np.array([1.-fundamentalSpread/2., 1.0, 1.+fundamentalSpread/2.])
+        if(multipleFundamentals):
+            self.fundamentalAdjust = np.array([1.-fundamentalSpread/2., 1.0, 1.+fundamentalSpread/2.])
+        else :
+            self.fundamentalAdjust = np.array([1.0])
         self.nFundamental = len(self.fundamentalAdjust)
+        print("Fundamental Adjust:",self.fundamentalAdjust)
 
         # Initialize arrays for current and previous fundamental forecasts
         self.fundamental = np.zeros(self.nFundamental)
@@ -103,7 +107,12 @@ class forecasts:
         
         # Configure the lookback windows for different volatility estimates
         # The model uses multiple timescales to capture market dynamics
-        self.volLag = [volLag]
+        # Single volatility lookback is primary basecase model
+        if (volLag==0):
+            volBase = 150
+            self.volLag =   [int(0.5*volBase),volBase,2*volBase,4*volBase,8*volBase,16*volBase,32*volBase]
+        else :
+            self.volLag = [volLag]
         # self.volLag = [int(0.5*volLag),volLag,2*volLag,3*volLag,5*volLag,8*volLag,13*volLag]
         # self.volLag = [int(0.33*volLag),volLag,3*volLag,9*volLag,27*volLag]
         # self.volLag = [volLag,2*volLag,3*volLag,5*volLag,8*volLag,13*volLag]
@@ -1549,7 +1558,7 @@ def archAdjust(x,k):
     return adj
 
 
-def modelIteration(nAgents, Tinit, Tmax, Lmin, Lmax, pf, deltaP, sigmae, kMax, adaptiveK, simpleDemands, maxTrade, tau, sigmaF, sigmaM, sigmaN, portfolioAdj, deltaT, lam, maxHold, beta, volLag,agentsPerPeriod,rhoBar,orderSigma,trimVol,probMarketOrder):
+def modelIteration(nAgents, Tinit, Tmax, Lmin, Lmax, pf, deltaP, sigmae, kMax, adaptiveK, multipleFundamentals, simpleDemands, maxTrade, tau, sigmaF, sigmaM, sigmaN, portfolioAdj, deltaT, lam, maxHold, beta, volLag,agentsPerPeriod,rhoBar,orderSigma,trimVol,probMarketOrder):
     """
     Execute a complete simulation of the limit order book model.
     
@@ -1579,6 +1588,8 @@ def modelIteration(nAgents, Tinit, Tmax, Lmin, Lmax, pf, deltaP, sigmae, kMax, a
         Maximum order placement deviation from forecast price
     adaptiveK : bool
         Whether to adapt order placement based on local volatility
+    multipleFundamentals : bool
+        heterogeneous fundamental forecast (bool) base = True
     simpleDemands : bool
         Whether to use simple demand functions as in CI(2002)
     maxTrade : int
@@ -1671,7 +1682,7 @@ def modelIteration(nAgents, Tinit, Tmax, Lmin, Lmax, pf, deltaP, sigmae, kMax, a
     print('beta',beta)
 
     # Create set of forecasts with shared parameters
-    forecastSet = forecasts(Lmax,pf,sigmae,volLag)
+    forecastSet = forecasts(Lmax,pf,sigmae,volLag,multipleFundamentals)
     # Create agents with heterogeneous parameters
     for i in range(nAgents):
         agentList.append(agent(sigmaF,sigmaM,sigmaN,kMax,Lmin,Lmax,forecastSet,beta,maxHold,tau,adaptiveK,simpleDemands,maxTrade,0.*sigmae,probMarketOrder))
@@ -2003,286 +2014,287 @@ def modelIteration(nAgents, Tinit, Tmax, Lmin, Lmax, pf, deltaP, sigmae, kMax, a
 
 
 # Start Experiment Setup ----------------------------------------------
-# Set default model setup parameters
+if __name__ == '__main__':
+    # Set default model setup parameters
 
-# Total number of agents in the simulation
-nAgents = 2000
-# Initial time periods (burn-in phase)
-Tinit = 10000
-Tinit = 10000
-# Maximum simulation time periods
-Tmax =  200000
-# Tmax =  400000
-# Range for analyzing summary statistics, excluding initial burn-in
-sumRange = range(50000,Tmax)
+    # Total number of agents in the simulation
+    nAgents = 2000
+    # Initial time periods (burn-in phase)
+    Tinit = 10000
+    Tinit = 10000
+    # Maximum simulation time periods
+    Tmax =  200000
+    # Tmax =  400000
+    # Range for analyzing summary statistics, excluding initial burn-in
+    sumRange = range(50000,Tmax)
 
-# Number of ticks per time period for data aggregation
-deltaT = 1
-deltaT = 50
-deltaTList = [deltaT]
-
-
-# Range parameters for trend-following rules
-# Minimum lookback period for chartist strategies
-Lmin = 10
-# Maximum lookback period for chartist strategies
-Lmax = 500
-
-# Fundamental price of the asset
-pf = 1000.
-# Price tick size for order book discretization
-deltaP = 0.025
-# deltaP = 0.1
+    # Number of ticks per time period for data aggregation
+    deltaT = 1
+    deltaT = 50
+    deltaTList = [deltaT]
 
 
-# use simple demands as in CI(2002)
-# False yields more complex multi-share demands
-# Flag to use simple demands as in Chiarella & Iori (2002)
-# True: agents submit orders for fixed number of shares
-# False: agents submit more complex multi-share demands
-simpleDemands = True
-# Flag to determine if agents adjust portfolios based on desired holdings
-portfolioAdj = False
+    # Range parameters for trend-following rules
+    # Minimum lookback period for chartist strategies
+    Lmin = 10
+    # Maximum lookback period for chartist strategies
+    Lmax = 500
 
-# Agent selection parameter:
-# For lam = 1, agents are selected completely randomly
-# For lam < 1, there is selection bias toward agents far from desired holdings
-lam = 1.00 # can't used lambda for obvious reasons
-
-# Simulation Run Number
-######### DO NOT TOUCH 
-numRuns = 0
-
-# Number of simulations
-# Touch
-interation = 1
-
-maxHoldList = [3, 5, 10, 25, 50, 100]
-# List of maximum position sizes for agents
-maxHoldList = [50.]
-# Simple demands trade [0,maxTrade] shares
-
-betaList = [3, 5, 10, 25, 50, 100]
-# List of intensity of choice parameters for hyperbolic tangent demand function
-# Note: not used in the paper, retained for future work.
-betaList = [3.]
-
-# forecasting parameters 
-# noise forecaster 
-# Noise forecaster standard deviation values to test
-sigmaeList = [0.00016, .01, .25, .75]
-# sigmaeList = [0.00001,0.00002,0.00005,0.0001,0.0002,0.0005,0.001]
-sigmaeList = [0.0001]
-
-# Strategy weight parameters (sum to 1.0)
-# Weight for fundamental trading strategy
-sigmaF = 0.45
-sigmaF = 0.10
-# Weight for trend-following/chartist trading strategy
-sigmaM = 0.00
-
-# really good:  sigmaF = 0.40, sigmaM = 0.40
-# sigmaN = 0.6 
-# Weight for noise trading strategy (calculated as remainder)
-sigmaN = 1. - sigmaF - sigmaM
+    # Fundamental price of the asset
+    pf = 1000.
+    # Price tick size for order book discretization
+    deltaP = 0.025
+    # deltaP = 0.1
 
 
-# number of periods before cancel
-# List of order lifetimes (tau values) to test
-tauList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50]
-tauList = [50]
-tauList = [15]
-tauList = [10,25,50,250]
-# Standard run tau
-tauList = [25]
-# Test tau
-# tauList = [75]
-# Alternative tau
-# tauList = [15]
+    # use simple demands as in CI(2002)
+    # False yields more complex multi-share demands
+    # Flag to use simple demands as in Chiarella & Iori (2002)
+    # True: agents submit orders for fixed number of shares
+    # False: agents submit more complex multi-share demands
+    simpleDemands = True
+    # Flag to determine if agents adjust portfolios based on desired holdings
+    portfolioAdj = False
+
+    # Agent selection parameter:
+    # For lam = 1, agents are selected completely randomly
+    # For lam < 1, there is selection bias toward agents far from desired holdings
+    lam = 1.00 # can't used lambda for obvious reasons
+
+    # Simulation Run Number
+    ######### DO NOT TOUCH 
+    numRuns = 0
+
+    # Number of simulations
+    # Touch
+    interation = 1
+
+    maxHoldList = [3, 5, 10, 25, 50, 100]
+    # List of maximum position sizes for agents
+    maxHoldList = [50.]
+    # Simple demands trade [0,maxTrade] shares
+
+    betaList = [3, 5, 10, 25, 50, 100]
+    # List of intensity of choice parameters for hyperbolic tangent demand function
+    # Note: not used in the paper, retained for future work.
+    betaList = [3.]
+
+    # forecasting parameters 
+    # noise forecaster 
+    # Noise forecaster standard deviation values to test
+    sigmaeList = [0.00016, .01, .25, .75]
+    # sigmaeList = [0.00001,0.00002,0.00005,0.0001,0.0002,0.0005,0.001]
+    sigmaeList = [0.0001]
+
+    # Strategy weight parameters (sum to 1.0)
+    # Weight for fundamental trading strategy
+    sigmaF = 0.45
+    sigmaF = 0.10
+    # Weight for trend-following/chartist trading strategy
+    sigmaM = 0.00
+
+    # really good:  sigmaF = 0.40, sigmaM = 0.40
+    # sigmaN = 0.6 
+    # Weight for noise trading strategy (calculated as remainder)
+    sigmaN = 1. - sigmaF - sigmaM
 
 
-
-# bid or ask distance from expected future price
-# Maximum bid/ask distance from expected future price (kappa parameter)
-kMax = 0.15
-kMax = 0.1
-kMax = 0.2
-kMax = 0.1
+    # number of periods before cancel
+    # List of order lifetimes (tau values) to test
+    tauList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    tauList = [50]
+    tauList = [15]
+    tauList = [10,25,50,250]
+    # Standard run tau
+    tauList = [25]
+    # Test tau
+    # tauList = [75]
+    # Alternative tau
+    # tauList = [15]
 
 
 
-# Probability of submitting a market order rather than limit order
-probMarketOrder = 0.05
+    # bid or ask distance from expected future price
+    # Maximum bid/ask distance from expected future price (kappa parameter)
+    kMax = 0.15
+    kMax = 0.1
+    kMax = 0.2
+    kMax = 0.1
 
 
-# Fundamental forecast parameter 
-#   Also price autocorrelation
-# Mean reversion parameter for fundamental price process
-# Also price autocorrelation parameter
-# rhoBar = 0.9997
-rhoBar = 0.9995
-rhoBar = 0.9995
-rhoBar = 0.999
+
+    # Probability of submitting a market order rather than limit order
+    probMarketOrder = 0.05
 
 
-# Noise on order (done to generate volume)
-# Standard deviation of random noise added to order prices
-orderSigma = 0.0
-# Forecasts trim large moves for local variance estimates?
-# Flag to trim large moves when estimating local variance
-trimVol = False
-# Order placement depends on local variance
-# Flag to adjust order placement based on local volatility
-adaptiveK = True
-# lag length (high freq units) for recent vol estimate
-# Lookback window for recent volatility estimation
-volLag = 150
-volLag = 150
+    # Fundamental forecast parameter 
+    #   Also price autocorrelation
+    # Mean reversion parameter for fundamental price process
+    # Also price autocorrelation parameter
+    # rhoBar = 0.9997
+    rhoBar = 0.9995
+    rhoBar = 0.9995
+    rhoBar = 0.999
 
 
-# shares traded uniform [1,maxTrade]
-# Maximum number of shares per trade (uniform between 1 and maxTrade)
-maxTrade = 1
-# number of agents arriving each period
-# Number of agents arriving to market each period
-agentsPerPeriod = 10
-agentsPerPeriod = 20
-agentsPerPeriod = 30
-
-# set parameter sweeps
-# Various parameter lists for sensitivity analysis
-
-
-# volLagList = [25,50,100,150,250, 500,750]
-volLagList = [150, 150, 150, 150, 150, 150, 150]
-# agentsPerPeriodList = [20, 20, 20, 20,20, 20, 20]
-agentsPerPeriodList = [30,30, 30, 30,30, 30, 30]
-deltaTList = [1,1,1,1,1,1,1]
-# sigmaFList = [0.05, 0.10, 0.15, 0.20,0.30,0.40,0.50]
-sigmaFList = [0.20,0.20,0.2,0.2,0.2,0.2,0.2]
-kMaxList =   [0.1, 0.1, 0.1, 0.1,0.1,0.1,0.1]
-# kMaxList = [0.01,0.025, 0.05,0.1, 0.25, 0.5, 1.0]
+    # Noise on order (done to generate volume)
+    # Standard deviation of random noise added to order prices
+    orderSigma = 0.0
+    # Forecasts trim large moves for local variance estimates?
+    # Flag to trim large moves when estimating local variance
+    trimVol = False
+    # Order placement depends on local variance
+    # Flag to adjust order placement based on local volatility
+    adaptiveK = True
+    # lag length (high freq units) for recent vol estimate
+    # Lookback window for recent volatility estimation
+    volLag = 150
+    volLag = 150
 
 
-# nListParams = len(kMaxList)
-# Number of parameter combinations to test
-nListParams = 1
+    # shares traded uniform [1,maxTrade]
+    # Maximum number of shares per trade (uniform between 1 and maxTrade)
+    maxTrade = 1
+    # number of agents arriving each period
+    # Number of agents arriving to market each period
+    agentsPerPeriod = 10
+    agentsPerPeriod = 20
+    agentsPerPeriod = 30
 
-# Optionally scale noise by sqrt(agentsPerPeriod)
-# for i in range(len(sigmaeList)):
-#     sigmaeList[i] /= np.sqrt(float(agentsPerPeriod))
-
-# pr = cProfile.Profile()
-# pr.enable()
-# Performance profiling setup (commented out)
-# End Experiment Setup ------------------------------------------------
-
-# Start simulation execution
-t0 = time()
-
-# Initialize summary output file
-summaryFile = open('runSummary.csv','w')
-summaryWrite = csv.writer(summaryFile,delimiter=',',lineterminator='\n')
-summaryWrite.writerow(['tau', 'sigmae', 'srret',   'acRret', 'acPrice', 'acRVMean', 'acabsRet', 'rretKurt', 'rVol', 'rSpread', 'rbidDepth', 'raskDepth'] )
+    # set parameter sweeps
+    # Various parameter lists for sensitivity analysis
 
 
-# This is the random varaible portion of the code 
-# If using a grid, set slurm array size
-slurm_array=2 #This is the maximum number of array's we would ever set up in SLURM 
-# Setup for random seed generation to ensure reproducibility
-# Standard run seed
-seed_of_seeds = 4242
-# Used for homogeneuous fundamentals case
-# seed_of_seeds = 42
-seed_rng = np.random.RandomState(seed_of_seeds)
-# seed_rng = np.random.RandomState(seed=None)
-# Generate an array of random seeds for all iterations and parameter combinations
-all_seeds = seed_rng.randint(0, 2**5-1, size=interation*slurm_array) #
-parameters_and_seed_index = []
+    # volLagList = [25,50,100,150,250, 500,750]
+    volLagList = [150, 150, 150, 150, 150, 150, 150]
+    # agentsPerPeriodList = [20, 20, 20, 20,20, 20, 20]
+    agentsPerPeriodList = [30,30, 30, 30,30, 30, 30]
+    deltaTList = [1,1,1,1,1,1,1]
+    # sigmaFList = [0.05, 0.10, 0.15, 0.20,0.30,0.40,0.50]
+    sigmaFList = [0.20,0.20,0.2,0.2,0.2,0.2,0.2]
+    kMaxList =   [0.1, 0.1, 0.1, 0.1,0.1,0.1,0.1]
+    # kMaxList = [0.01,0.025, 0.05,0.1, 0.25, 0.5, 1.0]
 
 
-# Create parameter combinations with seed indices
-# Used to select parameter combination when executing 
-# many parameter combinations on a slurm grid
-for ffff in range(len(tauList)):
-    for fff in range(len(sigmaeList)):
-        for i in range(len(all_seeds)):
-            parameters_and_seed_index.append((ffff, fff, i))     
+    # nListParams = len(kMaxList)
+    # Number of parameter combinations to test
+    nListParams = 1
 
-# Main loop for running simulations with different parameter combinations
-for ffff in range(len(tauList)):
-    for fff in range(len(sigmaeList)):
-        j=0
-        for ff in range(numRuns, numRuns + interation):
-        
-            # Select the appropriate seed for this parameter combination and iteration
-            temp_seed=all_seeds[parameters_and_seed_index[(slurm_it-1)*interation+j][2]]
-            #temp_seed=all_seeds[parameters_and_seed_index[(ffff,fff,i)]]
-            j+=1
-            np.random.seed(temp_seed)
-            # Run the model with current parameter settings
-            price, ret, rret, rRV, rRV2, totalV, rPrice, rSpread, rbidDepth, raskDepth, portDev, rportDev, holdings, dholdings, orders, rportDev_non_nan, Xsmooth_centered_non_nan, Xsmooth_trailing_non_nan, holdingsDiff, holdingsDiffABS, holdingsDist, holdingsDistABS, rVol, rOrders, marketBook, agentList, forecastSet, rdholdingsts, bidsdf, rbidSlope, asksdf, raskSlope, wealthByType, rpf, logPriceFund, rCRV, rtotalOrdersOnBook, orderFlow,pft = modelIteration(nAgents, Tinit, Tmax, Lmin, Lmax, pf, deltaP, float(sigmaeList[fff]), kMax, adaptiveK, simpleDemands, maxTrade, int(tauList[ffff]), sigmaF, sigmaM, sigmaN, portfolioAdj, deltaT, lam, int(maxHoldList[0]), betaList[0], volLag, agentsPerPeriod, rhoBar, orderSigma, trimVol, probMarketOrder) 
-              
-            t0 = time()
-            # Output order book data (commented out to save space)
-            #pd.DataFrame(bidsdf).to_csv("orderbookbids"+str(ff)+".csv", encoding='utf-8')
-            #pd.DataFrame(asksdf).to_csv("orderbookasks"+str(ff)+".csv", encoding='utf-8')
-            t1 = time()
-            print("Just ran one iteration; cummulative time = ", (t1-t0)/60/60, "hr,\tor", (t1-t0)/60, "min,\tor", t1-t0, "sec")
+    # Optionally scale noise by sqrt(agentsPerPeriod)
+    # for i in range(len(sigmaeList)):
+    #     sigmaeList[i] /= np.sqrt(float(agentsPerPeriod))
+
+    # pr = cProfile.Profile()
+    # pr.enable()
+    # Performance profiling setup (commented out)
+    # End Experiment Setup ------------------------------------------------
+
+    # Start simulation execution
+    t0 = time()
+
+    # Initialize summary output file
+    summaryFile = open('runSummary.csv','w')
+    summaryWrite = csv.writer(summaryFile,delimiter=',',lineterminator='\n')
+    summaryWrite.writerow(['tau', 'sigmae', 'srret',   'acRret', 'acPrice', 'acRVMean', 'acabsRet', 'rretKurt', 'rVol', 'rSpread', 'rbidDepth', 'raskDepth'] )
+
+
+    # This is the random varaible portion of the code 
+    # If using a grid, set slurm array size
+    slurm_array=2 #This is the maximum number of array's we would ever set up in SLURM 
+    # Setup for random seed generation to ensure reproducibility
+    # Standard run seed
+    seed_of_seeds = 4242
+    # Used for homogeneuous fundamentals case
+    # seed_of_seeds = 42
+    seed_rng = np.random.RandomState(seed_of_seeds)
+    # seed_rng = np.random.RandomState(seed=None)
+    # Generate an array of random seeds for all iterations and parameter combinations
+    all_seeds = seed_rng.randint(0, 2**5-1, size=interation*slurm_array) #
+    parameters_and_seed_index = []
+
+
+    # Create parameter combinations with seed indices
+    # Used to select parameter combination when executing 
+    # many parameter combinations on a slurm grid
+    for ffff in range(len(tauList)):
+        for fff in range(len(sigmaeList)):
+            for i in range(len(all_seeds)):
+                parameters_and_seed_index.append((ffff, fff, i))     
+
+    # Main loop for running simulations with different parameter combinations
+    for ffff in range(len(tauList)):
+        for fff in range(len(sigmaeList)):
+            j=0
+            for ff in range(numRuns, numRuns + interation):
             
-            # Calculate statistics on second half of simulation to avoid initialization effects
-            testRange = range(int( len(rret)/2),len(rret))
-            acRret  = fastautocorr1(rret[testRange])
-            acPrice = fastautocorr1(price)
-            acRV = fastautocorr(rRV2[testRange],20)
-            acabsRet = fastautocorr(abs(rret[testRange]),20)
-            acRVMean = np.mean(acRV[1:])
-            acabsRetMean = np.mean(acabsRet[1:])
-            rretKurt = kurtosis(rret[testRange])
-            # Write detailed time series output to CSV file
-            shoklossset1 = open("dataOutputFile"+str(ff)+".csv", 'w')
-            writer = csv.writer(shoklossset1, delimiter=',', lineterminator='\n')
-            for r in range(0, int((Tmax - Tinit) / deltaT) - 3):
-               writer.writerow((price[r], ret[r], rret[r], rRV[r], rRV2[r], rCRV[r], acRVMean, rVol[r], rPrice[r], rSpread[r], rtotalOrdersOnBook[r], rbidDepth[r], rbidSlope[r], raskDepth[r], raskSlope[r], tauList[ffff], sigmaeList[fff],temp_seed,pft[r] ))
-            shoklossset1.close()
-      
-            numRuns = numRuns + 1
+                # Select the appropriate seed for this parameter combination and iteration
+                temp_seed=all_seeds[parameters_and_seed_index[(slurm_it-1)*interation+j][2]]
+                #temp_seed=all_seeds[parameters_and_seed_index[(ffff,fff,i)]]
+                j+=1
+                np.random.seed(temp_seed)
+                # Run the model with current parameter settings
+                price, ret, rret, rRV, rRV2, totalV, rPrice, rSpread, rbidDepth, raskDepth, portDev, rportDev, holdings, dholdings, orders, rportDev_non_nan, Xsmooth_centered_non_nan, Xsmooth_trailing_non_nan, holdingsDiff, holdingsDiffABS, holdingsDist, holdingsDistABS, rVol, rOrders, marketBook, agentList, forecastSet, rdholdingsts, bidsdf, rbidSlope, asksdf, raskSlope, wealthByType, rpf, logPriceFund, rCRV, rtotalOrdersOnBook, orderFlow,pft = modelIteration(nAgents, Tinit, Tmax, Lmin, Lmax, pf, deltaP, float(sigmaeList[fff]), kMax, adaptiveK, simpleDemands, maxTrade, int(tauList[ffff]), sigmaF, sigmaM, sigmaN, portfolioAdj, deltaT, lam, int(maxHoldList[0]), betaList[0], volLag, agentsPerPeriod, rhoBar, orderSigma, trimVol, probMarketOrder) 
+                  
+                t0 = time()
+                # Output order book data (commented out to save space)
+                #pd.DataFrame(bidsdf).to_csv("orderbookbids"+str(ff)+".csv", encoding='utf-8')
+                #pd.DataFrame(asksdf).to_csv("orderbookasks"+str(ff)+".csv", encoding='utf-8')
+                t1 = time()
+                print("Just ran one iteration; cummulative time = ", (t1-t0)/60/60, "hr,\tor", (t1-t0)/60, "min,\tor", t1-t0, "sec")
+                
+                # Calculate statistics on second half of simulation to avoid initialization effects
+                testRange = range(int( len(rret)/2),len(rret))
+                acRret  = fastautocorr1(rret[testRange])
+                acPrice = fastautocorr1(price)
+                acRV = fastautocorr(rRV2[testRange],20)
+                acabsRet = fastautocorr(abs(rret[testRange]),20)
+                acRVMean = np.mean(acRV[1:])
+                acabsRetMean = np.mean(acabsRet[1:])
+                rretKurt = kurtosis(rret[testRange])
+                # Write detailed time series output to CSV file
+                shoklossset1 = open("dataOutputFile"+str(ff)+".csv", 'w')
+                writer = csv.writer(shoklossset1, delimiter=',', lineterminator='\n')
+                for r in range(0, int((Tmax - Tinit) / deltaT) - 3):
+                   writer.writerow((price[r], ret[r], rret[r], rRV[r], rRV2[r], rCRV[r], acRVMean, rVol[r], rPrice[r], rSpread[r], rtotalOrdersOnBook[r], rbidDepth[r], rbidSlope[r], raskDepth[r], raskSlope[r], tauList[ffff], sigmaeList[fff],temp_seed,pft[r] ))
+                shoklossset1.close()
+          
+                numRuns = numRuns + 1
 
-            # Write summary statistics for this parameter combination to summary file
-            summaryWrite.writerow([tauList[ffff],sigmaeList[fff],np.std(rret[testRange])*np.sqrt(250.),acRret,acPrice,acRVMean, acabsRetMean,rretKurt,np.mean(rVol[testRange]),np.mean(rSpread[testRange]),np.mean(rbidDepth[testRange]),np.mean(raskDepth[testRange])])
-            print(j)
+                # Write summary statistics for this parameter combination to summary file
+                summaryWrite.writerow([tauList[ffff],sigmaeList[fff],np.std(rret[testRange])*np.sqrt(250.),acRret,acPrice,acRVMean, acabsRetMean,rretKurt,np.mean(rVol[testRange]),np.mean(rSpread[testRange]),np.mean(rbidDepth[testRange]),np.mean(raskDepth[testRange])])
+                print(j)
+                
+    # Close summary file
+    del summaryWrite
+    summaryFile.close()
+     
+    # Calculate high-frequency realized volatility
+    rvhf = np.zeros(len(rret))  
+    j = 0;         
+    for t in range(Tinit+deltaT,Tmax-deltaT,deltaT):
+        rvhf[j] = np.mean(abs(ret[t-deltaT:t]))
+        j+=1
+
+
+    # Combine output files from all simulation runs
+    for mr in range(0, numRuns):
+        # Read individual output file for this simulation run
+        shockloss = csv.reader(open("dataOutputFile"+str(mr)+".csv","r"),delimiter=',')
+        shockloss = list(shockloss)
+        if mr == 0:
+            # For the first run, create a new combined output file with headers
+            shoklossset = open("dataOutputFileComplete.csv", 'w')
+            writer = csv.writer(shoklossset, delimiter=',', lineterminator='\n')
+            writer.writerow(("price", "ret", "rret", "rRV", "rRV2", "autocorrelation sum", "rvol", "rPrice", "spread", "bid depth", "ask depth", "tau", "sigmaE", "simulation run"))
             
-# Close summary file
-del summaryWrite
-summaryFile.close()
- 
-# Calculate high-frequency realized volatility
-rvhf = np.zeros(len(rret))  
-j = 0;         
-for t in range(Tinit+deltaT,Tmax-deltaT,deltaT):
-    rvhf[j] = np.mean(abs(ret[t-deltaT:t]))
-    j+=1
-
-
-# Combine output files from all simulation runs
-for mr in range(0, numRuns):
-    # Read individual output file for this simulation run
-    shockloss = csv.reader(open("dataOutputFile"+str(mr)+".csv","r"),delimiter=',')
-    shockloss = list(shockloss)
-    if mr == 0:
-        # For the first run, create a new combined output file with headers
-        shoklossset = open("dataOutputFileComplete.csv", 'w')
-        writer = csv.writer(shoklossset, delimiter=',', lineterminator='\n')
-        writer.writerow(("price", "ret", "rret", "rRV", "rRV2", "autocorrelation sum", "rvol", "rPrice", "spread", "bid depth", "ask depth", "tau", "sigmaE", "simulation run"))
-        
-        # Write all rows from the first simulation
-        for firm in range(0,len(shockloss)):
-            writer.writerow((float(shockloss[firm][0]), float(shockloss[firm][1]), float(shockloss[firm][2]), float(shockloss[firm][3]), float(shockloss[firm][4]), float(shockloss[firm][5]), float(shockloss[firm][6]), float(shockloss[firm][7]), float(shockloss[firm][8]), float(shockloss[firm][9]), float(shockloss[firm][10]), float(shockloss[firm][11]), float(shockloss[firm][12]), int(mr) ))
-        shoklossset.close()
-    else:
-        # For subsequent runs, append to the combined file
-        shoklossset = open("dataOutputFileComplete.csv", 'a')
-        writer = csv.writer(shoklossset, delimiter=',', lineterminator='\n')
-        for firm in range(0,len(shockloss)):
-            writer.writerow((float(shockloss[firm][0]), float(shockloss[firm][1]), float(shockloss[firm][2]), float(shockloss[firm][3]), float(shockloss[firm][4]), float(shockloss[firm][5]), float(shockloss[firm][6]), float(shockloss[firm][7]), float(shockloss[firm][8]), float(shockloss[firm][9]), float(shockloss[firm][10]), float(shockloss[firm][11]), float(shockloss[firm][12]), int(mr) ))
-        shoklossset.close()
+            # Write all rows from the first simulation
+            for firm in range(0,len(shockloss)):
+                writer.writerow((float(shockloss[firm][0]), float(shockloss[firm][1]), float(shockloss[firm][2]), float(shockloss[firm][3]), float(shockloss[firm][4]), float(shockloss[firm][5]), float(shockloss[firm][6]), float(shockloss[firm][7]), float(shockloss[firm][8]), float(shockloss[firm][9]), float(shockloss[firm][10]), float(shockloss[firm][11]), float(shockloss[firm][12]), int(mr) ))
+            shoklossset.close()
+        else:
+            # For subsequent runs, append to the combined file
+            shoklossset = open("dataOutputFileComplete.csv", 'a')
+            writer = csv.writer(shoklossset, delimiter=',', lineterminator='\n')
+            for firm in range(0,len(shockloss)):
+                writer.writerow((float(shockloss[firm][0]), float(shockloss[firm][1]), float(shockloss[firm][2]), float(shockloss[firm][3]), float(shockloss[firm][4]), float(shockloss[firm][5]), float(shockloss[firm][6]), float(shockloss[firm][7]), float(shockloss[firm][8]), float(shockloss[firm][9]), float(shockloss[firm][10]), float(shockloss[firm][11]), float(shockloss[firm][12]), int(mr) ))
+            shoklossset.close()

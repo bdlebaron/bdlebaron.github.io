@@ -50,11 +50,126 @@ from scipy.stats import kurtosis
 from scipy.stats import norm
 from scipy.stats import jarque_bera
 
+# Import functions from LOBModel instead of redefining them?
+#from LOBModel import fastautocorr, fastautocorr1, fastxcorr, archAdjust
 
 #Main Result
-path_for_output = 'dataOutputFile0.csv'
+#path_for_output = 'dataOutputFile0.csv'
 
 # Plotting functions
+def plot_four_panel(df, tau, sigmae, output_file=None):
+    """
+    Create the standard four-panel plot from paper.
+    
+    Parameters:
+    -----------
+    df : DataFrame
+        Data with columns including 'rret', 'rPrice', etc.
+    tau : float
+        Tau value for this simulation
+    sigmae : float  
+        Sigma_e value for this simulation
+    output_file : str, optional
+        If provided, save to this file
+    """
+    acflags = 50
+    nbins = 50
+    
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(6, 6))
+    fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    
+    temp_returns = df['rret'].values
+    temp_prices = df['rPrice'].values
+    
+    # Panel 1: Returns time series
+    ax[0, 0].plot(temp_returns)
+    ax[0, 0].grid()
+    ax[0, 0].set_title('Returns = r(t)')
+    
+    # Panel 2: Histogram with kurtosis
+    T = len(temp_returns)
+    temp_returns_clean = temp_returns[1:]
+    
+    n, bins, patches = ax[0, 1].hist(temp_returns_clean, nbins, density=True,
+                                      facecolor='green', alpha=0.5)
+    ax[0, 1].grid()
+    mu = np.mean(temp_returns_clean)
+    sigma = np.std(temp_returns_clean)
+    xmin, xmax = ax[0, 1].get_xlim()
+    x = np.linspace(xmin, xmax, 100)
+    p = norm.pdf(x, mu, sigma)
+    ax[0, 1].plot(x, p, 'k', linewidth=2)
+    
+    kurt = kurtosis(temp_returns_clean, fisher=False, bias=False)
+    ax[0, 1].set_title(f'Histogram\nkurtosis = {kurt:.1f}')
+    
+    # Panel 3: Price with ACF(1)
+    ax[1, 0].plot(temp_prices)
+    ax[1, 0].grid()
+    zz = fastautocorr(temp_prices, 2)[1]
+    ax[1, 0].set_xlabel('Day')
+    ax[1, 0].set_title(f"Price: ACF(1) = {zz:.3f}")
+    
+    # Panel 4: Autocorrelations
+    retacf = fastautocorr(temp_returns_clean, acflags)
+    aretacf = fastautocorr(np.abs(temp_returns_clean), acflags)
+    xpts = np.arange(1, acflags + 1, 1)
+    
+    ax[1, 1].plot(xpts, retacf[1:], label="r(t)")
+    ax[1, 1].plot(xpts, aretacf[1:], label="|r(t)|")
+    ax[1, 1].legend()
+    ax[1, 1].set_xlabel('Lag')
+    
+    bolBands = np.ones(50) * 1.96 / np.sqrt(T)
+    ax[1, 1].plot(xpts, bolBands, 'r--')
+    ax[1, 1].plot(xpts, -bolBands, 'r--')
+    ax[1, 1].set_title('Autocorrelations')
+    ax[1, 1].grid()
+    
+    if output_file:
+        plt.savefig(output_file+".png", dpi=300, bbox_inches='tight')
+        plt.savefig(output_file+".pdf", dpi=300, bbox_inches='tight')
+        print(f"Saved: {output_file}")
+    else:
+        plt.show()
+    
+    plt.close()
+
+def process_data_file(path_for_output, Delta=1, Start=500):
+    """
+    Load and process a data file.
+    
+    Parameters:
+    -----------
+    path_for_output : str
+        Path to CSV file
+    Delta : int
+        Downsampling interval
+    Start : int
+        Starting row to use
+        
+    Returns:
+    --------
+    df : DataFrame
+        Processed data
+    """
+    df = pd.read_csv(path_for_output)
+    
+    df.columns = ["price", "ret", "rret", "rRV", "rRV2", "rCRV",
+                  "autocorrelation sum", "rvol", "rPrice", "spread",
+                  "totalOrders", "bid depth", "bidslope", "ask depth",
+                  "askslope", "tau", "sigmaE", "seed", "fundamental"]
+    
+    # df['rvol'] = df['rvol'].rolling(50).sum()
+    
+    # Downsample if needed
+    df = df.iloc[Start::Delta, :]
+    df['abs_rret'] = np.abs(df['rret'])
+    
+    return df
+
+
+
 def plot_normal_histogram_helper(xdata,nbins=50):
     """
     Helper function that creates histogram data and computes normal distribution parameters.
@@ -274,154 +389,202 @@ def hill_estimate(x,frac):
     return 1./base
 
 
+if __name__ == '__main__':
+    """
+    Main execution: process data files and create plots.
+    """
+    import sys
+    
+    # Default input file
+    input_file = 'dataOutputFile0.csv'
+    
+    # Check if file provided as command line argument
+    if len(sys.argv) > 1:
+        input_file = sys.argv[1]
+    
+    print(f"Processing: {input_file}")
+    
+    # Load and process data
+    df = process_data_file(input_file, Delta=1, Start=500)
+    
+    print(f"Sample length: {len(df)}")
+    print(f"Annualized std: {np.sqrt(250) * np.std(df['rret']):.4f}")
+    print(f"Kurtosis: {kurtosis(df['rret'], fisher=False, bias=False):.2f}")
+    
+    # Get unique parameter combinations
+    tau_list = df['tau'].unique()
+    sigmae_list = df['sigmaE'].unique()
+    
+    # Create plots for each combination
+    for tau in tau_list:
+        for sigmae in sigmae_list:
+            tau_idx = df['tau'] == tau
+            sigmae_idx = df['sigmaE'] == sigmae
+            tau_sigmae_idx = np.logical_and(tau_idx, sigmae_idx)
+            
+            # Create subset
+            df_subset = df[tau_sigmae_idx].reset_index(drop=True)
+            
+            # Create filename
+            sigmae_str = str(sigmae).replace('.', '_')
+            tau_str = str(tau).replace('.', '_')
+            output_file = f'fourplot_tau_{tau_str}_sigmae_{sigmae_str}.png'
+            
+            print(f"\nGenerating plot for tau={tau}, sigmae={sigmae}")
+            plot_four_panel(df_subset, tau, sigmae, output_file)
+            
+            # Print statistics
+            print(f"  Std: {np.sqrt(250) * np.std(df_subset['rret']):.4f}")
+            print(f"  Kurtosis: {kurtosis(df_subset['rret'], fisher=False, bias=False):.2f}")
+    
+    print("\nDone!")
 
+# # First read in all the data: 
 
-# First read in all the data: 
+# path_for_output = 'dataOutputFile0.csv' #dataOutputFile0.csv
+# df = pd.read_csv(path_for_output)
 
-path_for_output = 'dataOutputFile0.csv' #dataOutputFile0.csv
-df = pd.read_csv(path_for_output)
+# print(df.shape)
+# print(len(df))
 
-print(df.shape)
-print(len(df))
+# df.columns=["price",
+          # "ret",
+          # "rret",
+          # "rRV",
+          # "rRV2","rCRV",
+          # "autocorrelation sum",
+          # "rvol",
+          # "rPrice",
+          # "spread","totalOrders",
+          # "bid depth","bidslope",
+          # "ask depth","askslope",
+          # "tau",
+          # "sigmaE","seed","fundamental" ]
 
-df.columns=["price",
-          "ret",
-          "rret",
-          "rRV",
-          "rRV2","rCRV",
-          "autocorrelation sum",
-          "rvol",
-          "rPrice",
-          "spread","totalOrders",
-          "bid depth","bidslope",
-          "ask depth","askslope",
-          "tau",
-          "sigmaE","seed","fundamental" ]
+# df['rvol']=df['rvol'].rolling(50).sum()
+# print("sample length=",len(df))
 
-df['rvol']=df['rvol'].rolling(50).sum()
-print("sample length=",len(df))
+# Delta = 50
+# Delta = 1
+# Start = 25000
+# Start = 500
+# drraw = df.copy()
+# df=df.iloc[Start::Delta,:]
+# df['abs_rret']=np.abs(df['rret'])
 
-Delta = 50
-Delta = 1
-Start = 25000
-Start = 500
-drraw = df.copy()
-df=df.iloc[Start::Delta,:]
-df['abs_rret']=np.abs(df['rret'])
+# # Extract the tau and sigma_e values:
+# tau_list = df['tau'].unique()
+# sigmae_list = df['sigmaE'].unique()
 
-# Extract the tau and sigma_e values:
-tau_list = df['tau'].unique()
-sigmae_list = df['sigmaE'].unique()
+# print("sample length=",len(df))
 
-print("sample length=",len(df))
-
-for tau in tau_list:
-    for sigmae in sigmae_list:
-        acflags = 50
-        tau_idx = df['tau'] == tau
-        sigmae_idx = df['sigmaE'] == sigmae
-        tau_sigmae_idx = np.logical_and(tau_idx, sigmae_idx)
+# for tau in tau_list:
+    # for sigmae in sigmae_list:
+        # acflags = 50
+        # tau_idx = df['tau'] == tau
+        # sigmae_idx = df['sigmaE'] == sigmae
+        # tau_sigmae_idx = np.logical_and(tau_idx, sigmae_idx)
         
-        # Let's remove the extra '.' from the name:
-        sigmae_str = str(sigmae)
-        sigmae_str = sigmae_str.replace('.', '_')
-        tau_str = str(tau)
-        tau_str = tau_str.replace('.', '_')
+        # # Let's remove the extra '.' from the name:
+        # sigmae_str = str(sigmae)
+        # sigmae_str = sigmae_str.replace('.', '_')
+        # tau_str = str(tau)
+        # tau_str = tau_str.replace('.', '_')
         
-        filename = 'fourplot_tau_'+tau_str+'sigmae_'+sigmae_str+".png"
+        # filename = 'fourplot_tau_'+tau_str+'sigmae_'+sigmae_str+".png"
         
-        nbins = 50
-        fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(6, 6))
-        fig.subplots_adjust(hspace=0.4, wspace=0.4)
-        # fig.suptitle('Returns for tau = '+str(tau)+", simgae = "+str(sigmae))
-        temp_returns = df['rret'][tau_sigmae_idx]
-        temp_returns = temp_returns.reset_index(drop=True)
-        temp_prices = df['rPrice'][tau_sigmae_idx]
-        # temp_prices = df['rPrice'][tau_sigmae_idx]                                                            a
-        temp_prices = temp_prices.reset_index(drop=True)
-        temp_vol = df['rvol'][tau_sigmae_idx]
-        temp_vol = temp_vol.reset_index(drop='True')
-        #fig, ax = plt.subplots(2, 2)
-        ax[0, 0].plot(temp_returns)
-        ax[0, 0].grid()
-        ax[0, 0].set_title('Returns = r(t)')
+        # nbins = 50
+        # fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(6, 6))
+        # fig.subplots_adjust(hspace=0.4, wspace=0.4)
+        # # fig.suptitle('Returns for tau = '+str(tau)+", simgae = "+str(sigmae))
+        # temp_returns = df['rret'][tau_sigmae_idx]
+        # temp_returns = temp_returns.reset_index(drop=True)
+        # temp_prices = df['rPrice'][tau_sigmae_idx]
+        # # temp_prices = df['rPrice'][tau_sigmae_idx]                                                            a
+        # temp_prices = temp_prices.reset_index(drop=True)
+        # temp_vol = df['rvol'][tau_sigmae_idx]
+        # temp_vol = temp_vol.reset_index(drop='True')
+        # #fig, ax = plt.subplots(2, 2)
+        # ax[0, 0].plot(temp_returns)
+        # ax[0, 0].grid()
+        # ax[0, 0].set_title('Returns = r(t)')
 
         
-        T = len(temp_returns.values)
-        temp_returns = temp_returns[1:len(temp_returns)]
+        # T = len(temp_returns.values)
+        # temp_returns = temp_returns[1:len(temp_returns)]
         
-        # get tail exponent estimate
-        # kappa = hill_estimate(np.abs(temp_returns.values),0.10)
-        # kappaView = round(kappa,1)
-        print('kappa')
-        # print(kappa,len(temp_returns))
+        # # get tail exponent estimate
+        # # kappa = hill_estimate(np.abs(temp_returns.values),0.10)
+        # # kappaView = round(kappa,1)
+        # print('kappa')
+        # # print(kappa,len(temp_returns))
         
-        n, bins, patches = ax[0, 1].hist(temp_returns, nbins, density=True,facecolor='green', alpha=0.5)
-        ax[0,1].grid()
-        mu = np.mean(temp_returns)
-        sigma = np.std(temp_returns)
-        xmin, xmax = ax[0,1].get_xlim()
+        # n, bins, patches = ax[0, 1].hist(temp_returns, nbins, density=True,facecolor='green', alpha=0.5)
+        # ax[0,1].grid()
+        # mu = np.mean(temp_returns)
+        # sigma = np.std(temp_returns)
+        # xmin, xmax = ax[0,1].get_xlim()
 
-        # Generate normal pdf from scipy.stats
-        x = np.linspace(xmin, xmax, 100)
-        p = norm.pdf(x, mu, sigma)
+        # # Generate normal pdf from scipy.stats
+        # x = np.linspace(xmin, xmax, 100)
+        # p = norm.pdf(x, mu, sigma)
           
-        ax[0,1].plot(x, p, 'k', linewidth=2)
+        # ax[0,1].plot(x, p, 'k', linewidth=2)
 
 
         
-        # y = plt.mlab.normpdf(bins,mu,sigma)
-        # ax[0, 1].plot(bins, y, 'r')
-        # ax[0, 1].set_title('Histogram \n kurtosis, tail = '+str(round(kurtosis(temp_returns, fisher=False, bias=False),1))+', '+str(kappaView))
+        # # y = plt.mlab.normpdf(bins,mu,sigma)
+        # # ax[0, 1].plot(bins, y, 'r')
+        # # ax[0, 1].set_title('Histogram \n kurtosis, tail = '+str(round(kurtosis(temp_returns, fisher=False, bias=False),1))+', '+str(kappaView))
         
-        ax[0, 1].set_title('Histogram \n kurtosis = '+str(round(kurtosis(temp_returns, fisher=False, bias=False),1)))
+        # ax[0, 1].set_title('Histogram \n kurtosis = '+str(round(kurtosis(temp_returns, fisher=False, bias=False),1)))
         
-        # plot_acf(temp_returns, ax=ax[2,1], lags=50,  zero=False)
-        retacf = fastautocorr(temp_returns.values,acflags)
-        T = len(temp_returns.values)
-        adj = archAdjust(temp_returns.values,50)
-        # print(adj)
+        # # plot_acf(temp_returns, ax=ax[2,1], lags=50,  zero=False)
+        # retacf = fastautocorr(temp_returns.values,acflags)
+        # T = len(temp_returns.values)
+        # adj = archAdjust(temp_returns.values,50)
+        # # print(adj)
+        # # bolBands = np.ones(50)*1.96/np.sqrt(T)
+        # # bolBands = 1.96*adj[1:]
+        # xpts = np.arange(1,acflags+1,1)
+        # ax[1,1].plot(xpts,retacf[1:],label="r(t)")
+        # # ax[2,1].plot(xpts,bolBands,'r--')
+        # # ax[2,1].plot(xpts,-bolBands,'r--')
+        # # ax[2,1].set_title('Autocorrelation; R')
+        # # ax[2,1].grid()
+        # # plot_acf(np.abs(temp_returns), ax=ax[1,1], lags=50,  zero=False, title='Autocorrelation; |R|')
+        # aretacf = fastautocorr(np.abs(temp_returns.values),acflags)
+        # ax[1,1].plot(xpts,aretacf[1:],label="|r(t)|")
+        # ax[1,1].legend()
+        # ax[1,1].set_xlabel('Lag')
         # bolBands = np.ones(50)*1.96/np.sqrt(T)
-        # bolBands = 1.96*adj[1:]
-        xpts = np.arange(1,acflags+1,1)
-        ax[1,1].plot(xpts,retacf[1:],label="r(t)")
-        # ax[2,1].plot(xpts,bolBands,'r--')
-        # ax[2,1].plot(xpts,-bolBands,'r--')
-        # ax[2,1].set_title('Autocorrelation; R')
-        # ax[2,1].grid()
-        # plot_acf(np.abs(temp_returns), ax=ax[1,1], lags=50,  zero=False, title='Autocorrelation; |R|')
-        aretacf = fastautocorr(np.abs(temp_returns.values),acflags)
-        ax[1,1].plot(xpts,aretacf[1:],label="|r(t)|")
-        ax[1,1].legend()
-        ax[1,1].set_xlabel('Lag')
-        bolBands = np.ones(50)*1.96/np.sqrt(T)
-        ax[1,1].plot(xpts,bolBands,'r--')
-        ax[1,1].plot(xpts,-bolBands,'r--')
-        ax[1,1].set_title('Autocorrelations')
-        ax[1,1].grid()
-        ax[1,0].plot(temp_prices)
-        ax[1,0].grid()
-        zz = fastautocorr(temp_prices.values,2)[1]
-        ax[1,0].set_xlabel('Day')
-        ax[1,0].set_title("Price: ACF(1) = "+str(round(zz,3)))
-        # ax[1,0].plot(temp_vol)
+        # ax[1,1].plot(xpts,bolBands,'r--')
+        # ax[1,1].plot(xpts,-bolBands,'r--')
+        # ax[1,1].set_title('Autocorrelations')
+        # ax[1,1].grid()
+        # ax[1,0].plot(temp_prices)
         # ax[1,0].grid()
-        # ax[1,0].set_title("Volume")
-        # plt.close()
-        plt.show()
+        # zz = fastautocorr(temp_prices.values,2)[1]
+        # ax[1,0].set_xlabel('Day')
+        # ax[1,0].set_title("Price: ACF(1) = "+str(round(zz,3)))
+        # # ax[1,0].plot(temp_vol)
+        # # ax[1,0].grid()
+        # # ax[1,0].set_title("Volume")
+        # # plt.close()
+        # plt.show()
         
         
-        print("Std: ",np.sqrt(250)*np.std(temp_returns))
-        print("Kurtosis: ", kurtosis(temp_returns))
-        from scipy.stats import kstest
-        x = np.random.standard_normal(3500)
-        print(kstest(temp_returns,'norm',alternative='two-sided'))
-        print(kstest(x, 'norm',alternative='two-sided'))
+        # print("Std: ",np.sqrt(250)*np.std(temp_returns))
+        # print("Kurtosis: ", kurtosis(temp_returns))
+        # from scipy.stats import kstest
+        # x = np.random.standard_normal(3500)
+        # print(kstest(temp_returns,'norm',alternative='two-sided'))
+        # print(kstest(x, 'norm',alternative='two-sided'))
 
-        print(jarque_bera(temp_returns))
-        print(jarque_bera(x))
+        # print(jarque_bera(temp_returns))
+        # print(jarque_bera(x))
         
         
-plt.show()
+# plt.show()
 
 
