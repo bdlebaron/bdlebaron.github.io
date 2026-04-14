@@ -1,8 +1,10 @@
 
-Replication Python code for
+Replication Python code for:
+
+Dynamic Order Dispersion and Volatility Persistence in a Simple Limit Order Book model
 
 By:
-
+Andrew Hawley; Blake LeBaron; Mark Paddrik; Nathan Palmer
 
 
 This set of Python code will replicate most of the key figures in the paper with the simulated model.
@@ -22,7 +24,7 @@ To run the code:
 
 Requirements:
 
-Code uses requires the following standard Python libraries:
+Code requires the following standard Python libraries:
 
 1) numpy
 2) pandas
