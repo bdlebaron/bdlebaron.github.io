@@ -37,7 +37,7 @@ These libraries are all part of the standard Anaconda Python distribution which 
 the base for our code.
 
 We have tested all this code in both Win11, and Ubuntu Linux (using WSL on Windows).
-Both used Python version 3.11.7.
+Python version 3.13.9 (Oct 2025 ) for Windows, and version 3.11.15 (March 2026) for linux.
 
 
 Two omissions:
