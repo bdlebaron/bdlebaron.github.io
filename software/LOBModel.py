@@ -695,19 +695,19 @@ class agent:
             # uniform range not less than zero
             urange = min(uRangeStart,sigmaF)
             urange = min(urange,1.-sigmaF)
-            self.fundWeight = float(np.random.uniform(sigmaF-urange,sigmaF+urange,1))
+            self.fundWeight = float(np.random.uniform(sigmaF-urange,sigmaF+urange,None))
         else:
             self.fundWeight = 0.
         if(sigmaM>0):
             urange = min(uRangeStart,sigmaM)
             urange = min(urange,1.-sigmaM)
-            self.chartWeight = float(np.random.uniform(sigmaM-urange,sigmaM+urange,1))
+            self.chartWeight = float(np.random.uniform(sigmaM-urange,sigmaM+urange,None))
         else:
             self.chartWeight = 0.
         if(sigmaN>0):
             urange = min(uRangeStart,sigmaN)
             urange = min(urange,1.-sigmaN)
-            self.noiseWeight = float(np.random.uniform(sigmaN-urange,sigmaN+urange,1))
+            self.noiseWeight = float(np.random.uniform(sigmaN-urange,sigmaN+urange,None))
         else:
            self.noiseWeight = 0. 
         # Build simple agents
@@ -715,7 +715,7 @@ class agent:
         simple = True  # simple/pure strat agents
 
         if(simple):
-            xrnd = np.random.uniform(low=0.,high=1.,size=1)
+            xrnd = np.random.uniform(low=0.,high=1.,size=None)
             self.fundWeight = float(xrnd<sigmaF)
             self.chartWeight = float( (xrnd>sigmaF) and (xrnd<sigmaF+sigmaM))
             self.noiseWeight = float(xrnd>(sigmaF+sigmaM))
@@ -743,7 +743,7 @@ class agent:
         # Note:  k is not used:  Kappa is the final say on demand shading
         # Here it is allowed to cross the book (>0 value)
         # It is modified to ktilde in the order generation part
-        self.kappa = float(np.random.uniform(low=-kmax, high =0*kmax, size=1))
+        self.kappa = float(np.random.uniform(low=-kmax, high =0*kmax, size=None))
         self.adaptiveK = adaptiveK
         self.simpleDemands = simpleDemands
         self.ktilde = self.k * np.random.rand()

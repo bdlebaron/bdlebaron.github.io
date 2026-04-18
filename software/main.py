@@ -11,6 +11,9 @@ This is the turnkey script that runs all simulations and generates all figures.
 import numpy as np
 from random import choices
 import pandas as pd
+import matplotlib
+# Shutdown interactive plotting
+matplotlib.use('Agg')  # Use the 'Agg' backend for non-GUI rendering
 import matplotlib.pyplot as plt
 from scipy.stats import kurtosis, norm
 from statsmodels.tsa.arima.model import ARIMA
@@ -698,19 +701,19 @@ def main():
         print("\nGenerating Figure 14...")
         df_rc = process_data_file("dataOutputFile_reduced_cancel.csv")
         plot_four_panel(df_rc, params_rc['tau'], params_rc['sigmae'],
-                       "figures/Figure14_reduced_cancelations.png")
+                       "figures/Figure14_reduced_cancelations")
     
     if 'trimmed' in experiments:
         print("\nGenerating Figure 15...")
         df_tv = process_data_file("dataOutputFile_trimmed.csv")
         plot_four_panel(df_tv, params_tv['tau'], params_tv['sigmae'],
-                       "figures/Figure15_trimmed_volatility.png")
+                       "figures/Figure15_trimmed_volatility")
     
     if 'noise' in experiments:
         print("\nGenerating Figure 16...")
         df_noise = process_data_file("dataOutputFile_noise.csv")
         plot_four_panel(df_noise, params_noise['tau'], params_noise['sigmae'],
-                       "figures/Figure16_increased_noise.png")
+                       "figures/Figure16_increased_noise")
     
     # ========================================================================
     # SUMMARY
