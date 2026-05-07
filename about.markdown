@@ -5,12 +5,11 @@ permalink: /about/
 ---
 
 <h4> Title and mailing address: </h4>
-The Abram L. and Thelma Sachar Professor of International Economics
-School of Business and Economics
-International Business School
-Brandeis University
-415 South Street, MS 032
-Waltham, MA 02453
+The Abram L. and Thelma Sachar Professor of International Economics <br>
+School of Business and Economics <br>
+Brandeis University <br>
+415 South Street, MS 032 <br>
+Waltham, MA 02453 <br>
 USA
 
 
