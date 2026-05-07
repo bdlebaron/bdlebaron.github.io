@@ -20,7 +20,7 @@ permalink: /research/
 # Summary of recent working papers
 
 1. **Dynamic Order Dispersion and Volatility Persistence in a Simple
-Limit Order Book Model**
+Limit Order Book Model**, forthcoming <em> Journal of Economic Dynamics and Control, 2026</em>
   - **Joint with:** Andrew Hawley, Mark Paddrik, and Nathan Palmer
   - **Abstract:** This preliminary paper extends the dynamics of a basic stylized limit
   order book model introduced in \mycite{ChiIor2002}. The
