@@ -4,16 +4,19 @@ title: About
 permalink: /about/
 ---
 
+<h4> Title and mailing address: </h4>
+The Abram L. and Thelma Sachar Professor of International Economics
+School of Business and Economics
+International Business School
+Brandeis University
+415 South Street, MS 032
+Waltham, MA 02453
+USA
 
-
-<h4> My original Brandeis website:</h4>
-
-[Blake LeBaron](https://people.brandeis.edu/~blebaron)
 
 <h4> Office phone number: </h4>
 
 **781-736-2258**
-
 
 
 

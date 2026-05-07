@@ -8,7 +8,7 @@ permalink: /teaching/
 
 
 
-# This is a summary of classes I'm currently teaching in *Fall 2024*
+# This is a summary of classes I taught in *Fall 2025*
 
 1. **Machine Learning and Data Analysis for Business and Finance**  (masters)
 2. **Python and Applications to Business Analytics** (masters)
@@ -23,8 +23,9 @@ permalink: /teaching/
 5. Asset pricing (PhD)
 6. Microeconomics (PhD)
 7. Macroeconomics (PhD)
-8. Econometrics (PhD)
-9. Agent-based economics (PhD)
+8. International finance (PhD)
+9. Econometrics (PhD)
+10. Agent-based economics (PhD)
 
 # Web based prototype classes
 
